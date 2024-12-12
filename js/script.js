@@ -1,90 +1,95 @@
+// Global variables
+const studentContainer = document.querySelector(".student-list");
+const paginationList = document.querySelector(".link-list");
+const search = document.querySelector("#search");
+const studentsPerPage = 9;
 
-/*** 
-   GLOBAL VARIABLES
-***/
 
-let fullList = $('.student-list').children()
-let list = [];
+search.addEventListener("keyup", (e) => {
+   const newList = [];
+   const userInput = e.target.value.toLowerCase();
 
-/*** 
-   showPage function that shows 10 students per page.
-***/
+   for(let i = 0; i < data.length; i++) {
+      const studentName = data[i].name.first.concat(" ", data[i].name.last).toLowerCase();
 
-const showPage = (list, page) => {
-   let pagination = (page-1)*(10);
-   let min = pagination;
-   let max = pagination + 9;
-
-   $(list).each(function(index) {
-      
-      if (index >= min && index <= max) {
-         $(this).show();
-      } else {
-         $(this).hide();
+      if(studentName.includes(userInput)) {
+         newList.push(data[i]);
       }
-   })
-};
-
-/*** 
-   appendPageLinks function that creates pagination depending on the number of students.
-***/
-
-let appendPageLinks = (list) => {
-   let pages = Math.ceil(list.length/ 10);
-   
-   $(".pagination").empty();
-
-   for(let i = 0; i < pages; i++) {
-      $('.pagination').append(`<li><a>${i+1}</a></li>`);
    }
-   $(".pagination li:first-child a").addClass("active");
-   let primero = $('.pagination li:first-child');
-   showPage(list, 1);
 
-   $('.pagination li a').click(function() {
-      $('.pagination li a').each(function(index) {
-         $(this).removeClass("active")
-      })
-      showPage(list, $(this).text());
-      $(this).addClass("active")
-   });
-};
-
-
-
-/*** 
-   Input and Button functionality
-***/
-
-$('.student-search').children().on("click keyup", function(e) {
-   let search = $('.student-search input').val().toLowerCase();
-   let count = 0;
-   let countS = 0;
-   list = [];
-
-   if(search === "") {
-      showPage(fullList, 1);
-      appendPageLinks(fullList);
-      $('h1').hide();
+   if(newList.length > 0) {
+      addPagination(newList);
+      showPage(newList, 1);
+       console.log(newList)
    } else {
-      $('.student-item').each(function(index) {
-         if ($(this).children().children()[1].innerHTML.includes(search)) {  
-            $(this).show(); 
-            list.push($(this));
-         } else {
-            $(this).hide();
-            count++;
-            console.log(count)
-               if(count === 54) {
-                  $('h1').show();
-               } else {
-                  $('h1').hide();
-               }
-         }
-      }) 
-      appendPageLinks(list);
-   }     
+      const message = '<h3>No results found...</h3>';
+      studentContainer.innerHTML = message;
+      paginationList.innerHTML = "";
+   }
 });
 
-appendPageLinks(fullList);
+
+/* This function will handle calculating how many and which
+authors to show on the current page and dynamically add them */
+
+function showPage(list, page) {
+   const firstStudent = (page * studentsPerPage) - studentsPerPage;
+   const lastStudent = (page * studentsPerPage) - 1;
+   studentContainer.innerHTML = "";  
+
+   for(let i = 0; i < list.length; i++) {
+      if(i <= lastStudent && i >= firstStudent) {
+         const studentList = `
+         <li class="student-item cf">
+            <div class="student-details">
+            <img class="avatar" src="${list[i].picture.thumbnail}" alt="Profile Picture">
+            <h3>${list[i].name.first} ${list[i].name.last}</h3>
+            <span class="email">${list[i].email}</span>
+            </div>
+            <div class="joined-details">
+            <span class="date">Joined ${list[i].registered.date}</span>
+            </div>
+         </li>`;
+         studentContainer.insertAdjacentHTML("beforeend", studentList);
+      }
+   }
+ }
+
+
+/*
+This function will create and insert/append the elements needed for the pagination buttons
+*/
+
+function addPagination(list) {
+   const numberOfPages = Math.ceil(list.length / studentsPerPage);
+   paginationList.innerHTML = "";
+
+   for(let i = 0; i < numberOfPages; i++) {
+      let pageButton = `
+      <li>
+         <button type="button">${i+1}</button>
+      </li>`;
+      paginationList.insertAdjacentHTML("beforeend", pageButton);
+   }
+   paginationList.querySelector('.link-list li:first-child button').classList.add('active');
+}
+
+
+/* This event listener will handle calling our function
+above to change the page & add the `active` class  */
+
+paginationList.addEventListener("click", (e) => {
+   const active = document.querySelector('.active');
+
+   if(e.target.closest("button")) {
+      active.classList.remove('active');
+      e.target.closest("button").classList.add('active');
+      showPage(data, e.target.innerHTML);
+   }
+});
+
+/* These function calls are needed to initialize the page */
+addPagination(data);
+showPage(data, 1);
+
 
