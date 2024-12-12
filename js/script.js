@@ -3,6 +3,7 @@ const studentContainer = document.querySelector(".student-list");
 const paginationList = document.querySelector(".link-list");
 const search = document.querySelector("#search");
 const studentsPerPage = 9;
+let currentList = data; 
 
 
 search.addEventListener("keyup", (e) => {
@@ -18,9 +19,9 @@ search.addEventListener("keyup", (e) => {
    }
 
    if(newList.length > 0) {
-      addPagination(newList);
-      showPage(newList, 1);
-       console.log(newList)
+      currentList = newList;
+      addPagination(currentList);
+      showPage(currentList, 1);
    } else {
       const message = '<h3>No results found...</h3>';
       studentContainer.innerHTML = message;
@@ -84,7 +85,7 @@ paginationList.addEventListener("click", (e) => {
    if(e.target.closest("button")) {
       active.classList.remove('active');
       e.target.closest("button").classList.add('active');
-      showPage(data, e.target.innerHTML);
+      showPage(currentList, e.target.innerHTML);
    }
 });
 
